@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AlertDefinition xmlns="http://schemas.datacontract.org/2004/07/SolarWinds.Orion.Core.Alerting.Models" xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+  <n>APC UPS - High Output Load Warning</n>
+  <Description>Alerts when APC UPS output load exceeds 80%. Monitors APC Output Load OID 1.3.6.1.4.1.318.1.1.1.4.2.3.0. Value is percentage 0-100. Resets at 70% to avoid alert flapping.</Description>
+  <Enabled>true</Enabled>
+  <Severity>3</Severity>
+  <FrequencyOfEvaluation>300</FrequencyOfEvaluation>
+  <ObjectType>Orion.Nodes</ObjectType>
+  <TriggerCondition>
+    <Operator>And</Operator>
+    <Conditions>
+      <Condition>
+        <Property>CustomPollers.APC_Output_Load_Percent</Property>
+        <Operator>GreaterThanOrEqual</Operator>
+        <Value>80</Value>
+      </Condition>
+      <Condition>
+        <Property>CustomProperties.Device_Role</Property>
+        <Operator>Equal</Operator>
+        <Value>UPS</Value>
+      </Condition>
+    </Conditions>
+  </TriggerCondition>
+  <ResetCondition>
+    <Operator>And</Operator>
+    <Conditions>
+      <Condition>
+        <Property>CustomPollers.APC_Output_Load_Percent</Property>
+        <Operator>LessThan</Operator>
+        <Value>70</Value>
+      </Condition>
+    </Conditions>
+  </ResetCondition>
+  <TriggerActions>
+    <Action>
+      <ActionType>EmailAction</ActionType>
+      <Parameters>
+        <Parameter>
+          <n>To</n>
+          <Value>network-alerts@yourdomain.com</Value>
+        </Parameter>
+        <Parameter>
+          <n>Subject</n>
+          <Value>WARNING: High UPS Load Detected - ${NodeName}</Value>
+        </Parameter>
+        <Parameter>
+          <n>Message</n>
+          <Value>** APC UPS HIGH LOAD WARNING **
+
+Device:    ${NodeName}
+IP:        ${IP_Address}
+Location:  ${Location}
+Time:      ${DateTime}
+
+WARNING: This UPS is operating at or above 80% output load capacity.
+
+High load reduces available runtime during a power outage and
+increases stress on the UPS and battery.
+
+Recommended actions:
+  1. Review connected equipment at this location
+  2. Consider load balancing across additional UPS units
+  3. Evaluate if additional capacity is needed at: ${Location}
+  4. Check for any newly added equipment drawing unexpected load
+
+Alert threshold:  80% load
+Reset threshold:  70% load
+
+APC Device Web UI: http://${IP_Address}
+
+-- SolarWinds Automated Alert</Value>
+        </Parameter>
+      </Parameters>
+    </Action>
+  </TriggerActions>
+  <ResetActions>
+    <Action>
+      <ActionType>EmailAction</ActionType>
+      <Parameters>
+        <Parameter>
+          <n>To</n>
+          <Value>network-alerts@yourdomain.com</Value>
+        </Parameter>
+        <Parameter>
+          <n>Subject</n>
+          <Value>RESOLVED: UPS Load Returned to Normal - ${NodeName}</Value>
+        </Parameter>
+        <Parameter>
+          <n>Message</n>
+          <Value>** APC UPS HIGH LOAD ALERT CLEARED **
+
+Device:    ${NodeName}
+IP:        ${IP_Address}
+Location:  ${Location}
+Time:      ${DateTime}
+
+UPS output load has dropped below 70% and returned to normal levels.
+No further action required unless load reduction was unplanned.
+
+APC Device Web UI: http://${IP_Address}
+
+-- SolarWinds Automated Alert</Value>
+        </Parameter>
+      </Parameters>
+    </Action>
+  </ResetActions>
+</AlertDefinition>

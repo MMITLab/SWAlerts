@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AlertDefinition xmlns="http://schemas.datacontract.org/2004/07/SolarWinds.Orion.Core.Alerting.Models" xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+  <n>APC UPS - Low Battery / On Battery Power</n>
+  <Description>Alerts when an APC UPS reports a low battery or fault condition. Monitors APC Battery Status OID 1.3.6.1.4.1.318.1.1.1.2.1.1.0. Values: 1=Unknown, 2=Normal, 3=Low Battery, 4=Fault.</Description>
+  <Enabled>true</Enabled>
+  <Severity>1</Severity>
+  <FrequencyOfEvaluation>60</FrequencyOfEvaluation>
+  <ObjectType>Orion.Nodes</ObjectType>
+  <TriggerCondition>
+    <Operator>And</Operator>
+    <Conditions>
+      <Condition>
+        <Property>CustomPollers.APC_Battery_Status</Property>
+        <Operator>GreaterThanOrEqual</Operator>
+        <Value>3</Value>
+      </Condition>
+      <Condition>
+        <Property>CustomProperties.Device_Role</Property>
+        <Operator>Equal</Operator>
+        <Value>UPS</Value>
+      </Condition>
+    </Conditions>
+  </TriggerCondition>
+  <ResetCondition>
+    <Operator>And</Operator>
+    <Conditions>
+      <Condition>
+        <Property>CustomPollers.APC_Battery_Status</Property>
+        <Operator>Equal</Operator>
+        <Value>2</Value>
+      </Condition>
+    </Conditions>
+  </ResetCondition>
+  <TriggerActions>
+    <Action>
+      <ActionType>EmailAction</ActionType>
+      <Parameters>
+        <Parameter>
+          <n>To</n>
+          <Value>network-alerts@yourdomain.com</Value>
+        </Parameter>
+        <Parameter>
+          <n>Subject</n>
+          <Value>HIGH: UPS Low Battery / Fault Condition - ${NodeName}</Value>
+        </Parameter>
+        <Parameter>
+          <n>Message</n>
+          <Value>** APC UPS BATTERY STATUS ALERT **
+
+Device:    ${NodeName}
+IP:        ${IP_Address}
+Location:  ${Location}
+Time:      ${DateTime}
+
+WARNING: This UPS is reporting a low battery or fault condition.
+
+Battery Status Values:
+  3 = Low Battery  (device may be running on battery power)
+  4 = Fault Condition (hardware fault detected)
+
+Immediate action may be required. Check the device web UI or
+physically inspect the UPS at the above location.
+
+APC Device Web UI: http://${IP_Address}
+
+-- SolarWinds Automated Alert</Value>
+        </Parameter>
+      </Parameters>
+    </Action>
+  </TriggerActions>
+  <ResetActions>
+    <Action>
+      <ActionType>EmailAction</ActionType>
+      <Parameters>
+        <Parameter>
+          <n>To</n>
+          <Value>network-alerts@yourdomain.com</Value>
+        </Parameter>
+        <Parameter>
+          <n>Subject</n>
+          <Value>RESOLVED: UPS Battery Status Normal - ${NodeName}</Value>
+        </Parameter>
+        <Parameter>
+          <n>Message</n>
+          <Value>** APC UPS BATTERY STATUS CLEARED **
+
+Device:    ${NodeName}
+IP:        ${IP_Address}
+Location:  ${Location}
+Time:      ${DateTime}
+
+The UPS battery status has returned to Normal (Value = 2).
+Please verify the device is operating correctly.
+
+APC Device Web UI: http://${IP_Address}
+
+-- SolarWinds Automated Alert</Value>
+        </Parameter>
+      </Parameters>
+    </Action>
+  </ResetActions>
+</AlertDefinition>

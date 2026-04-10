@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AlertDefinition xmlns="http://schemas.datacontract.org/2004/07/SolarWinds.Orion.Core.Alerting.Models" xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+  <Name>APC UPS - Battery Replacement Required</Name>
+  <Description>Alerts when an APC UPS reports that the battery needs to be replaced. Monitors APC Battery Replace Indicator OID 1.3.6.1.4.1.318.1.1.1.2.2.4.0. Value 2 = Replace Battery.</Description>
+  <Enabled>true</Enabled>
+  <Severity>2</Severity>
+  <FrequencyOfEvaluation>120</FrequencyOfEvaluation>
+  <ObjectType>Orion.Nodes</ObjectType>
+  <TriggerCondition>
+    <Operator>And</Operator>
+    <Conditions>
+      <Condition>
+        <Property>CustomPollers.APC_Battery_Replace_Indicator</Property>
+        <Operator>Equal</Operator>
+        <Value>2</Value>
+      </Condition>
+      <Condition>
+        <Property>CustomProperties.Device_Role</Property>
+        <Operator>Equal</Operator>
+        <Value>UPS</Value>
+      </Condition>
+    </Conditions>
+  </TriggerCondition>
+  <ResetCondition>
+    <Operator>And</Operator>
+    <Conditions>
+      <Condition>
+        <Property>CustomPollers.APC_Battery_Replace_Indicator</Property>
+        <Operator>Equal</Operator>
+        <Value>1</Value>
+      </Condition>
+    </Conditions>
+  </ResetCondition>
+  <TriggerActions>
+    <Action>
+      <ActionType>EmailAction</ActionType>
+      <Parameters>
+        <Parameter>
+          <Name>To</Name>
+          <Value>network-alerts@yourdomain.com</Value>
+        </Parameter>
+        <Parameter>
+          <Name>Subject</Name>
+          <Value>CRITICAL: Battery Replacement Required - ${NodeName}</Value>
+        </Parameter>
+        <Parameter>
+          <Name>Message</Name>
+          <Value>** APC UPS BATTERY REPLACEMENT ALERT **
+
+Device:    ${NodeName}
+IP:        ${IP_Address}
+Location:  ${Location}
+Time:      ${DateTime}
+
+ACTION REQUIRED: The battery in this UPS unit needs immediate replacement.
+Battery Replace Indicator = 2 (Replace Battery Now)
+
+Please schedule battery replacement to avoid unprotected downtime.
+
+APC Device Web UI: http://${IP_Address}
+
+-- SolarWinds Automated Alert</Value>
+        </Parameter>
+      </Parameters>
+    </Action>
+  </TriggerActions>
+  <ResetActions>
+    <Action>
+      <ActionType>EmailAction</ActionType>
+      <Parameters>
+        <Parameter>
+          <Name>To</Name>
+          <Value>network-alerts@yourdomain.com</Value>
+        </Parameter>
+        <Parameter>
+          <Name>Subject</Name>
+          <Value>RESOLVED: Battery Replacement Alert Cleared - ${NodeName}</Value>
+        </Parameter>
+        <Parameter>
+          <Name>Message</Name>
+          <Value>** APC UPS BATTERY ALERT CLEARED **
+
+Device:    ${NodeName}
+IP:        ${IP_Address}
+Location:  ${Location}
+Time:      ${DateTime}
+
+The battery replacement indicator has returned to normal (OK).
+Please verify the replacement was completed successfully.
+
+-- SolarWinds Automated Alert</Value>
+        </Parameter>
+      </Parameters>
+    </Action>
+  </ResetActions>
+</AlertDefinition>

@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AlertDefinition xmlns="http://schemas.datacontract.org/2004/07/SolarWinds.Orion.Core.Alerting.Models" xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+  <n>APC UPS - Critical Runtime Remaining</n>
+  <Description>Alerts when APC UPS battery runtime drops below 6 minutes (36000 timeticks). Monitors APC Battery Runtime Remaining OID 1.3.6.1.4.1.318.1.1.1.2.2.3.0. Runtime returned in timeticks - hundredths of a second. 36000 = 6 minutes.</Description>
+  <Enabled>true</Enabled>
+  <Severity>2</Severity>
+  <FrequencyOfEvaluation>60</FrequencyOfEvaluation>
+  <ObjectType>Orion.Nodes</ObjectType>
+  <TriggerCondition>
+    <Operator>And</Operator>
+    <Conditions>
+      <Condition>
+        <Property>CustomPollers.APC_Battery_Runtime_Remaining</Property>
+        <Operator>LessThanOrEqual</Operator>
+        <Value>36000</Value>
+      </Condition>
+      <Condition>
+        <Property>CustomPollers.APC_Battery_Runtime_Remaining</Property>
+        <Operator>GreaterThan</Operator>
+        <Value>0</Value>
+      </Condition>
+      <Condition>
+        <Property>CustomProperties.Device_Role</Property>
+        <Operator>Equal</Operator>
+        <Value>UPS</Value>
+      </Condition>
+    </Conditions>
+  </TriggerCondition>
+  <ResetCondition>
+    <Operator>And</Operator>
+    <Conditions>
+      <Condition>
+        <Property>CustomPollers.APC_Battery_Runtime_Remaining</Property>
+        <Operator>GreaterThan</Operator>
+        <Value>36000</Value>
+      </Condition>
+    </Conditions>
+  </ResetCondition>
+  <TriggerActions>
+    <Action>
+      <ActionType>EmailAction</ActionType>
+      <Parameters>
+        <Parameter>
+          <n>To</n>
+          <Value>network-alerts@yourdomain.com</Value>
+        </Parameter>
+        <Parameter>
+          <n>Subject</n>
+          <Value>CRITICAL: UPS Runtime Critically Low - ${NodeName}</Value>
+        </Parameter>
+        <Parameter>
+          <n>Message</n>
+          <Value>** APC UPS RUNTIME CRITICAL ALERT **
+
+Device:    ${NodeName}
+IP:        ${IP_Address}
+Location:  ${Location}
+Time:      ${DateTime}
+
+CRITICAL: This UPS has less than 6 minutes of battery runtime remaining.
+
+This device is likely running on battery power due to a power outage
+or power quality issue at this location.
+
+Immediate actions required:
+  1. Verify power status at location: ${Location}
+  2. Begin graceful shutdown of connected equipment if power
+     cannot be restored immediately
+  3. Contact facilities if power outage is confirmed
+
+Runtime threshold: 36000 timeticks = 6 minutes
+Adjust if more shutdown time is needed:
+  60000  = 10 minutes
+  180000 = 30 minutes
+
+APC Device Web UI: http://${IP_Address}
+
+-- SolarWinds Automated Alert</Value>
+        </Parameter>
+      </Parameters>
+    </Action>
+  </TriggerActions>
+  <ResetActions>
+    <Action>
+      <ActionType>EmailAction</ActionType>
+      <Parameters>
+        <Parameter>
+          <n>To</n>
+          <Value>network-alerts@yourdomain.com</Value>
+        </Parameter>
+        <Parameter>
+          <n>Subject</n>
+          <Value>RESOLVED: UPS Runtime Restored - ${NodeName}</Value>
+        </Parameter>
+        <Parameter>
+          <n>Message</n>
+          <Value>** APC UPS RUNTIME ALERT CLEARED **
+
+Device:    ${NodeName}
+IP:        ${IP_Address}
+Location:  ${Location}
+Time:      ${DateTime}
+
+UPS battery runtime has returned above the 6 minute threshold.
+The device appears to be charging or restored to utility power.
+
+Please verify the device and connected equipment are operating normally.
+
+APC Device Web UI: http://${IP_Address}
+
+-- SolarWinds Automated Alert</Value>
+        </Parameter>
+      </Parameters>
+    </Action>
+  </ResetActions>
+</AlertDefinition>
